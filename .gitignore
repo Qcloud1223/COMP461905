@@ -4,3 +4,4 @@
 **.so
 !Makefile
 build
+src/orig
