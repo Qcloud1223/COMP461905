@@ -7,6 +7,9 @@ TST-LIBS          = test_lib/SimpleMul.so
 CFLAGS = -g -shared -fPIC
 LDFLAGS = -ldl
 
+loader: build/loader.so
+loader-sample: build/loader-sample.so
+
 build/loader.so: $(LOADER-SRC) | build
 	$(CC) $(CFLAGS) $(LOADER-SRC) -o $@ $(LDFLAGS)
 
@@ -25,3 +28,6 @@ build:
 
 build/testrun: testrun.c
 	$(CC) -g -o $@ $< -L./build -Wl,-rpath,./build -l:loader-sample.so
+
+clean:
+	rm -f build/loader.so build/loader-sample.so

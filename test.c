@@ -9,29 +9,54 @@ int main(int argc, char *argv[], char *env[])
 {
     // argv0: program name
     // argv1: name of test file
-    // argv2 and so on: the function we want to call, write to a buffer and compare it 
-    //     so it always takes char* as its argument. It returns nothing for currently 
-    //     I did not see the reason in doing so.
-    if (argc < 3)
+    // argv2: name of the function
+    // argv3: type of the function
+    // argv4 and so on: argument for test function
+    if (argc < 4)
     {
         fprintf(stderr, "too few argument to call test program\n");
         exit(-1);
     }
 
-    char dlBuffer[BUFFER_LEN];
     void *dlHandle = dlopen(argv[1], RTLD_LAZY);
     if(!dlHandle)
     {
         fprintf(stderr, "error in opening file: %s, reason: %s\n", argv[1], dlerror());
         exit(-1);
     }
-    void (*f)(char *) = dlsym(dlHandle, argv[2]);
-    if(!f)
+
+    int func_type = atoi(argv[3]);
+    switch (func_type)
     {
-        fprintf(stderr, "error in finding symbol:%s, reason: %s\n", argv[2], dlerror());
-        exit(-1);
+        case VOID_CHARP:
+        {
+            void (*f)(char *) = dlsym(dlHandle, argv[2]);
+            if(!f)
+            {
+                fprintf(stderr, "error in finding symbol:%s, reason: %s\n", argv[2], dlerror());
+                exit(-1);
+            }
+            char dlBuffer[BUFFER_LEN];
+            f(dlBuffer);
+            printf("%s", dlBuffer);
+            break;
+        } 
+            
+        case INT_INTINT:
+        {
+            int (*f)(int, int) = dlsym(dlHandle,argv[2]);
+            if(!f)
+            {
+                fprintf(stderr, "error in finding symbol:%s, reason: %s\n", argv[2], dlerror());
+                exit(-1);
+            }
+            int op1 = atoi(argv[4]);
+            int op2 = atoi(argv[5]);
+            printf("%d\n", f(op1, op2));
+            break;
+        }
+            
     }
-    f(dlBuffer);
-    printf("%s", dlBuffer);
+
     return 0;
 }
