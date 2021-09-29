@@ -1,7 +1,6 @@
 #include <stdio.h>
-#include "../test.h"
 
-void foo(char *s)
+void foo(void)
 {
-    sprintf(s, "Hello World!\n");
+    printf("Hello World!\n");
 }

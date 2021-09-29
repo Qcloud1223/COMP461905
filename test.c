@@ -37,12 +37,12 @@ int main(int argc, char *argv[], char *env[])
     int func_type = atoi(argv[3]);
     switch (func_type)
     {
-        case VOID_CHARP:
+        case VOID_VOID:
         {
 #ifdef USE_DLOPEN
-            void (*f)(char *) = dlsym(handle, argv[2]);
+            void (*f)(void) = dlsym(handle, argv[2]);
 #else
-            void (*f)(char *) = FindSymbol(handle, argv[2]);
+            void (*f)(void) = FindSymbol(handle, argv[2]);
 #endif
             if(!f)
             {
@@ -53,9 +53,7 @@ int main(int argc, char *argv[], char *env[])
 #endif
                 exit(-1);
             }
-            char dlBuffer[BUFFER_LEN];
-            f(dlBuffer);
-            printf("%s", dlBuffer);
+            f();
             break;
         } 
             
