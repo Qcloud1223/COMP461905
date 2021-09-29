@@ -6,9 +6,11 @@ TST-LIBS          = test_lib/SimpleMul.so
 
 CFLAGS = -g -shared -fPIC
 LDFLAGS = -ldl
+CUSTOM-LDR = -L./build -Wl,-rpath,./build -l:loader-sample.so
 
 loader: build/loader.so
 loader-sample: build/loader-sample.so
+.PHONY: test
 
 build/loader.so: $(LOADER-SRC) | build
 	$(CC) $(CFLAGS) $(LOADER-SRC) -o $@ $(LDFLAGS)
@@ -27,7 +29,15 @@ build:
 	@mkdir -p $@
 
 build/testrun: testrun.c
-	$(CC) -g -o $@ $< -L./build -Wl,-rpath,./build -l:loader-sample.so
+	$(CC) -g -o $@ $< $(CUSTOM-LDR)
+
+test: build/run-dlopen build/run-openlib
+
+build/run-dlopen: test.c
+	$(CC) -g -DUSE_DLOPEN=1 -o $@ $< $(LDFLAGS)
+
+build/run-openlib: test.c
+	$(CC) -g -o $@ $< $(CUSTOM-LDR)
 
 clean:
-	rm -f build/loader.so build/loader-sample.so
+	rm -f build/loader.so build/loader-sample.so build/run-dlopen build/run-openlib

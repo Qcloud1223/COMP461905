@@ -4,6 +4,7 @@
 #include <dlfcn.h>
 
 #include "test.h"
+#include "src/Loader.h"
 
 int main(int argc, char *argv[], char *env[])
 {
@@ -18,10 +19,18 @@ int main(int argc, char *argv[], char *env[])
         exit(-1);
     }
 
-    void *dlHandle = dlopen(argv[1], RTLD_LAZY);
-    if(!dlHandle)
+#ifdef USE_DLOPEN
+    void *handle = dlopen(argv[1], RTLD_LAZY);
+#else
+    void *handle = OpenLibrary(argv[1], BIND_NOW);
+#endif    
+    if(!handle)
     {
+#ifdef USE_DLOPEN
         fprintf(stderr, "error in opening file: %s, reason: %s\n", argv[1], dlerror());
+#else
+        fprintf(stderr, "error in OpenLibrary with file: %s\n", argv[1]);
+#endif
         exit(-1);
     }
 
@@ -30,10 +39,18 @@ int main(int argc, char *argv[], char *env[])
     {
         case VOID_CHARP:
         {
-            void (*f)(char *) = dlsym(dlHandle, argv[2]);
+#ifdef USE_DLOPEN
+            void (*f)(char *) = dlsym(handle, argv[2]);
+#else
+            void (*f)(char *) = FindSymbol(handle, argv[2]);
+#endif
             if(!f)
             {
+#ifdef USE_DLOPEN
                 fprintf(stderr, "error in finding symbol:%s, reason: %s\n", argv[2], dlerror());
+#else
+                fprintf(stderr, "error in FindSymbol: %s\n", argv[2]);
+#endif
                 exit(-1);
             }
             char dlBuffer[BUFFER_LEN];
@@ -44,10 +61,18 @@ int main(int argc, char *argv[], char *env[])
             
         case INT_INTINT:
         {
-            int (*f)(int, int) = dlsym(dlHandle,argv[2]);
+#ifdef USE_DLOPEN
+            int (*f)(int, int) = dlsym(handle, argv[2]);
+#else
+            int (*f)(int, int) = FindSymbol(handle, argv[2]);
+#endif
             if(!f)
             {
+#ifdef USE_DLOPEN
                 fprintf(stderr, "error in finding symbol:%s, reason: %s\n", argv[2], dlerror());
+#else
+                fprintf(stderr, "error in FindSymbol: %s\n", argv[2]);
+#endif
                 exit(-1);
             }
             int op1 = atoi(argv[4]);
