@@ -94,12 +94,16 @@ if __name__ == '__main__':
     allTests.append(test0)
     test1 = TestCase('lib1', 'foo', VOID_VOID)
     test1.assign_score(5)
-    test1.assign_name('fake libc')
+    test1.assign_name('fake libc(one PLT relocation with answer known)')
     allTests.append(test1)
     test2 = TestCase('SimpleIni', 'entry', VOID_VOID)
     test2.assign_score(5)
     test2.assign_name('one initialization(depend on test 1)')
     allTests.append(test2)
+    test3 = TestCase('SimpleDep', 'wrapper', INT_INTINT, '2', '3')
+    test3.assign_score(3)
+    test3.assign_name('one true PLT relocation')
+    allTests.append(test3)
 
     totalScore = 0
     claimedScore = 0

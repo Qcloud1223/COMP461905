@@ -8,6 +8,9 @@ CFLAGS = -g -shared -fPIC
 LDFLAGS = -ldl
 CUSTOM-LDR = -L./build -Wl,-rpath,./build -l:loader-sample.so
 
+# TODO: test-suite
+
+# sample loader and skeleton loader library
 loader: build/loader.so
 loader-sample: build/loader-sample.so
 .PHONY: test
@@ -15,19 +18,23 @@ loader-sample: build/loader-sample.so
 build/loader.so: $(LOADER-SRC) | build
 	$(CC) $(CFLAGS) $(LOADER-SRC) -o $@ $(LDFLAGS)
 
-# sample loader used for skeleton verification
 build/loader-sample.so: $(LOADER-SAMPLE-SRC) | build
 	$(CC) $(CFLAGS) $(LOADER-SAMPLE-SRC) -o $@ $(LDFLAGS)
 
-libs: $(TST-LIBS)
+# test libs for autograder
+libs: $(TST-LIBS) test_lib/SimpleDep.so
 
 $(TST-LIBS): %.so: %.c
 	$(CC) $(CFLAGS) $< -o $@
+
+test_lib/SimpleDep.so: test_lib/SimpleDep.c
+	$(CC) $(CFLAGS) $< -o $@ -L./test_lib -Wl,-rpath,./test_lib -l:SimpleMul.so
 
 # @ can suppress the echo of the command
 build:
 	@mkdir -p $@
 
+# test program used as slave of autograder
 build/testrun: testrun.c
 	$(CC) -g -o $@ $< $(CUSTOM-LDR)
 
