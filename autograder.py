@@ -104,6 +104,10 @@ if __name__ == '__main__':
     test3.assign_score(3)
     test3.assign_name('one true PLT relocation')
     allTests.append(test3)
+    test4 = TestCase('SimpleData', 'wrapper', VOID_VOID)
+    test4.assign_score(3)
+    test4.assign_name('one global data relocation')
+    allTests.append(test4)
 
     totalScore = 0
     claimedScore = 0
