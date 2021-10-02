@@ -22,13 +22,16 @@ build/loader-sample.so: $(LOADER-SAMPLE-SRC) | build
 	$(CC) $(CFLAGS) $(LOADER-SAMPLE-SRC) -o $@ $(LDFLAGS)
 
 # test libs for autograder
-libs: $(TST-LIBS) test_lib/SimpleDep.so
+libs: $(TST-LIBS) test_lib/SimpleDep.so test_lib/IndirectDep.so
 
 $(TST-LIBS): %.so: %.c
 	$(CC) $(CFLAGS) $< -o $@
 
 test_lib/SimpleDep.so: test_lib/SimpleDep.c
 	$(CC) $(CFLAGS) $< -o $@ -L./test_lib -Wl,-rpath,./test_lib -l:SimpleMul.so
+
+test_lib/IndirectDep.so: test_lib/IndirectDep.c
+	$(CC) $(CFLAGS) $< -o $@ -L./test_lib -Wl,-rpath,./test_lib -l:SimpleDep.so
 
 # @ can suppress the echo of the command
 build:

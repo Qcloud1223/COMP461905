@@ -108,6 +108,10 @@ if __name__ == '__main__':
     test4.assign_score(3)
     test4.assign_name('one global data relocation')
     allTests.append(test4)
+    test4 = TestCase('IndirectDep', 'wrapperAgain', INT_INTINT, '2', '3')
+    test4.assign_score(2)
+    test4.assign_name('one 2-layer relocation')
+    allTests.append(test4)
 
     totalScore = 0
     claimedScore = 0
