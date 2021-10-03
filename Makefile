@@ -1,7 +1,7 @@
 CC = gcc
 LOADER-SRC        = src/OpenLibrary.c
 LOADER-SAMPLE-SRC = $(addprefix src/orig/,OpenLibrary.c MapLibrary.c RelocLibrary.c \
-						FindSymbol.c RuntimeResolve.c trampoline.S)
+						FindSymbol.c RuntimeResolve.c trampoline.S InitLibrary.c)
 TST-LIBS          = $(addprefix test_lib/,lib1.so SimpleMul.so SimpleIni.so SimpleData.so)
 
 CFLAGS = -g -shared -fPIC

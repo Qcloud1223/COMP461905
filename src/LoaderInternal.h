@@ -8,5 +8,6 @@
 
 extern void *MapLibrary(const char *name);
 extern void RelocLibrary(LinkMap *l, int mode);
+extern void InitLibrary(LinkMap *l);
 
 #endif /* LoaderInternal.h */
