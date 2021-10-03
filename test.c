@@ -29,7 +29,7 @@ int main(int argc, char *argv[], char *env[])
 #ifdef USE_DLOPEN
         fprintf(stderr, "error in opening file: %s, reason: %s\n", argv[1], dlerror());
 #else
-        fprintf(stderr, "error in OpenLibrary with file: %s\n", argv[1]);
+        fprintf(stderr, "OpenLibrary cannot open file: %s\n", argv[1]);
 #endif
         exit(-1);
     }
@@ -49,7 +49,7 @@ int main(int argc, char *argv[], char *env[])
 #ifdef USE_DLOPEN
                 fprintf(stderr, "error in finding symbol:%s, reason: %s\n", argv[2], dlerror());
 #else
-                fprintf(stderr, "error in FindSymbol: %s\n", argv[2]);
+                fprintf(stderr, "FindSymbol cannot find symbol: %s\n", argv[2]);
 #endif
                 exit(-1);
             }
@@ -69,7 +69,7 @@ int main(int argc, char *argv[], char *env[])
 #ifdef USE_DLOPEN
                 fprintf(stderr, "error in finding symbol:%s, reason: %s\n", argv[2], dlerror());
 #else
-                fprintf(stderr, "error in FindSymbol: %s\n", argv[2]);
+                fprintf(stderr, "FindSymbol cannot find symbol: %s\n", argv[2]);
 #endif
                 exit(-1);
             }

@@ -1,5 +1,6 @@
 CC = gcc
-LOADER-SRC        = src/OpenLibrary.c
+LOADER-SRC        = $(addprefix src/,OpenLibrary.c MapLibrary.c RelocLibrary.c \
+						FindSymbol.c RuntimeResolve.c trampoline.S InitLibrary.c)
 LOADER-SAMPLE-SRC = $(addprefix src/orig/,OpenLibrary.c MapLibrary.c RelocLibrary.c \
 						FindSymbol.c RuntimeResolve.c trampoline.S InitLibrary.c)
 TST-LIBS          = $(addprefix test_lib/,lib1.so SimpleMul.so SimpleIni.so SimpleData.so)
@@ -7,8 +8,9 @@ TST-LIBS          = $(addprefix test_lib/,lib1.so SimpleMul.so SimpleIni.so Simp
 CFLAGS = -g -shared -fPIC
 LDFLAGS = -ldl
 CUSTOM-LDR = -L./build -Wl,-rpath,./build -l:loader-sample.so
+REAL-LDR = -L./build -Wl,-rpath,./build -l:loader.so
 
-# TODO: test-suite
+all: loader libs test
 
 # sample loader and skeleton loader library
 loader: build/loader.so
@@ -39,7 +41,8 @@ build:
 
 # test program used as slave of autograder
 build/testrun: testrun.c
-	$(CC) -g -o $@ $< $(CUSTOM-LDR)
+	$(CC) -g -o $@ $< $(REAL-LDR)
+# $(CC) -g -o $@ $< $(CUSTOM-LDR)
 
 test: build/run-dlopen build/run-openlib
 
@@ -47,7 +50,8 @@ build/run-dlopen: test.c
 	$(CC) -g -DUSE_DLOPEN=1 -o $@ $< $(LDFLAGS)
 
 build/run-openlib: test.c
-	$(CC) -g -o $@ $< $(CUSTOM-LDR)
+	$(CC) -g -o $@ $< $(REAL-LDR)
+#  $(CC) -g -o $@ $< $(CUSTOM-LDR)
 
 clean:
 	rm -f build/loader.so build/loader-sample.so build/run-dlopen build/run-openlib

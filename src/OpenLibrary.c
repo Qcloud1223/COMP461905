@@ -1,7 +1,16 @@
+#include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
+#include "Loader.h"
+#include "LoaderInternal.h"
 
-int main()
+void *OpenLibrary(const char *name, int mode)
 {
-    printf("Hello World!\n");
-    return 0;
+    LinkMap *new = MapLibrary(name);
+
+    RelocLibrary(new, mode);
+
+    InitLibrary(new);
+
+    return new;
 }

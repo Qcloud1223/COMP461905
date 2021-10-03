@@ -112,6 +112,14 @@ if __name__ == '__main__':
     test4.assign_score(2)
     test4.assign_name('one 2-layer relocation')
     allTests.append(test4)
+    # TODO: add lazy relocation tests
+    # sanity tests end
+    """
+        further tests can include: 
+        order-related init; 
+        rpath handling(single and multi layer);
+        these tests are kinda like corner cases and contradict the goal of this project 
+    """
 
     totalScore = 0
     claimedScore = 0

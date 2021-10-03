@@ -9,5 +9,6 @@
 extern void *MapLibrary(const char *name);
 extern void RelocLibrary(LinkMap *l, int mode);
 extern void InitLibrary(LinkMap *l);
+void *symbolLookup(LinkMap *dep, const char *name);
 
 #endif /* LoaderInternal.h */
