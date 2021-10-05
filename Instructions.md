@@ -133,6 +133,18 @@ typedef struct
   ...
 } Elf64_Ehdr;
 ```
+So, to pinpoint the segments, we need to find *program header table*,
+which stores the information we see in `readelf -l`.
+ 
+First, we need to find out the *ELF header*, or `Elf64_Ehdr` above.
+It always starts at offset 0 of an ELF file, so use `read()`, `fread()`, or `pread()`
+to read `sizeof(Elf64_Ehdr)` number of bytes can find that.
+
+`e_phoff`, `e_phentsize`, and `e_phnum` denote the file offset of program header table,
+the size of each entry in program header table, and the number of program headers in it.
+Again, you can use the file operation you like to load the table into a buffer,
+and then traverse it to get information of each segment.
+
 Once we have found a segment, it's time we load it into memory.
 `mmap()` is intended for this. It create a mapping from a file in the disk to somewhere in the memory,
 and this is what is called "loading a file into memory" throughout this document.
