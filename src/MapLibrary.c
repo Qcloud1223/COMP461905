@@ -85,7 +85,12 @@ void *MapLibrary(const char *name)
      * 
      * lib = malloc(sizeof(LinkMap));
      * 
-     * lib->addr = mmap(...);
+     * foreach segment:
+     * mmap(start_addr, segment_length, segment_prot, MAP_FILE | ..., library_fd, 
+     *      segment_offset);
+     * 
+     * lib -> addr = ...;
+     * lib -> dyn = ...;
      * 
      * fill_info(lib);
      * setup_hash(lib);

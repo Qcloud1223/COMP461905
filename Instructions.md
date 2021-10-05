@@ -136,8 +136,27 @@ typedef struct
 Once we have found a segment, it's time we load it into memory.
 `mmap()` is intended for this. It create a mapping from a file in the disk to somewhere in the memory,
 and this is what is called "loading a file into memory" throughout this document.
-Use `mmap()` to create mappings for each segment, and you can find more about mmap in this man page:
+**Use `mmap()` to create mappings for each segment**, and you can find more about mmap in this man page:
 https://man7.org/linux/man-pages/man2/mmap.2.html
+
+*More on `mmap()`*: here is a TL;DR version of man page.
+A `mmap()` call takes 6 arguments, and now we take the first segment we see above(at line 82) as an example:
+
+This segment starts from offset 0 in file, has an aligment requirement of `0x1000`, and needs `0x4b0` bytes of 
+memory. Therefore, we need to call `mmap()` like this:
+```c
+// Elf64_Phdr *first_segment;
+// int fd = open(path_to_library);
+int prot = 0;
+prot |= (first_segment->prot && PF_R)? PROT_READ : 0;
+prot |= (first_segment->prot && PF_W)? PROT_WRITE : 0;
+prot |= (first_segment->prot && PF_X)? PROT_EXEC : 0;
+void *start_addr = mmap(NULL, ALIGN_UP(first_segment->p_memsz, getpagesize()), prot, 
+     MAP_FILE | MAP_PRIVATE, fd, first_segment->offset);
+```
+One subtle thing you need to notice is that `PF_R` is used to signify a *segment* has read permission,
+while `PROT_READ` is used to show a *virtual memory page* has read permission.
+We need to convert that when calling `mmap()`.
 
 Alright, the memory mappings are now ready to go. 
 Now, to make `FindSymbol` able to find a function provided by this library, 
