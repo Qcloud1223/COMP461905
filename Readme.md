@@ -11,6 +11,11 @@ make
 To get you hands on this project, check `Instructions.md` for a step-by-step tutorial.
 
 ### Evaluate your code
+To review your submission as a whole, use:
 ```bash
 python autograder.py
+```
+To debug individual test case, use:
+```bash
+python autograder.py test-index
 ```

@@ -1,6 +1,7 @@
 #! /usr/bin/env python3
 import subprocess
 import signal
+import sys
 
 # C-style define
 VOID_VOID = '0'
@@ -25,6 +26,13 @@ class TestCase:
     
     def assign_name(self, name):
         self.testName = name
+    
+    def debug(self):
+        self.debugArg = ['gdb', '--args']
+        self.debugArg.extend((self.customLdExe, self.soName, self.funcName, self.funcType))
+        if self.extraArg:
+            self.debugArg.extend(self.args)
+        subprocess.call(self.debugArg)
     
     def run_task(self):
         print("Test name:", self.testName)
@@ -120,6 +128,15 @@ if __name__ == '__main__':
         rpath handling(single and multi layer);
         these tests are kinda like corner cases and contradict the goal of this project 
     """
+
+    if len(sys.argv) > 2:
+        print("Please specify an individual testcase!")
+        exit(-1)
+    elif len(sys.argv) == 2:
+        allTests[int(sys.argv[1])].debug()
+        print('-'*50)
+        print("gdb exits")
+        exit(0)
 
     totalScore = 0
     claimedScore = 0

@@ -39,11 +39,11 @@ test_lib/IndirectDep.so: test_lib/IndirectDep.c
 build:
 	@mkdir -p $@
 
-# test program used as slave of autograder
-build/testrun: testrun.c
-	$(CC) -g -o $@ $< $(REAL-LDR)
+# build/testrun: testrun.c
+# 	$(CC) -g -o $@ $< $(REAL-LDR)
 # $(CC) -g -o $@ $< $(CUSTOM-LDR)
 
+# test program used as slave of autograder
 test: build/run-dlopen build/run-openlib
 
 build/run-dlopen: test.c
