@@ -4,9 +4,9 @@
 #include "Loader.h"
 #include "LoaderInternal.h"
 
-void *OpenLibrary(const char *name, int mode)
+void *OpenLibrary(const char *libpath, int mode)
 {
-    LinkMap *new = MapLibrary(name);
+    LinkMap *new = MapLibrary(libpath);
 
     RelocLibrary(new, mode);
 

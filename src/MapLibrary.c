@@ -76,7 +76,7 @@ static void fill_info(LinkMap *lib)
     rebase(DT_INIT_ARRAY);
 }
 
-void *MapLibrary(const char *name)
+void *MapLibrary(const char *libpath)
 {
     /*
      * hint:

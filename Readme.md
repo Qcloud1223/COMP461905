@@ -5,6 +5,7 @@ Proudly at XJTU.
 ### To make
 ```bash
 git clone https://github.com/Qcloud1223/COMP461905.git
+cd COMP461905
 make
 ```
 To get you hands on this project, check `Instructions.md` for a step-by-step tutorial.
