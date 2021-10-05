@@ -141,6 +141,8 @@ typedef struct
 } Elf64_Ehdr;
 // Ehdr is short for "ELF header"
 ```
+*This header file can usually be found under `/usr/include`.*
+
 So, to pinpoint the segments, we need to find **program header table**,
 which stores the information we see in `readelf -l`.
 So called **program header** is actually an abstract of a segment, containing
@@ -159,12 +161,26 @@ To sum up, the working order would be:
 
 `Elf64_Ehdr` -> `e_phoff` -> `Elf64_Phdr` -> `p_type`, `p_offset`, ...
 
-Once we have found a segment, it's time we load it into memory.
+---
+Once we have found a segment, it's time we decide whether to load it into memory.
+We can see this clearly again in <elf.h>:
+```c
+/* Legal values for p_type (segment type).  */
+
+#define	PT_NULL		0		/* Program header table entry unused */
+#define PT_LOAD		1		/* Loadable program segment */
+#define PT_DYNAMIC	2		/* Dynamic linking information */
+#define PT_INTERP	3		/* Program interpreter */
+...
+```
+Obviously, the segment with `p_type` set to `PT_LOAD` needs loading.
+
 `mmap()` is intended for this. It create a mapping from a file in the disk to somewhere in the memory,
 and this is what is called "loading a file into memory" throughout this document.
-**Use `mmap()` to create mappings for each segment**, and you can find more about mmap in this man page:
+**Use `mmap()` to create mappings for each segment**. You can find more about mmap in this man page:
 https://man7.org/linux/man-pages/man2/mmap.2.html
 
+---
 *More on `mmap()`*: here is a TL;DR version of man page.
 A `mmap()` call takes 6 arguments, and now we take the first segment we see above(at line 82) as an example:
 
@@ -195,8 +211,9 @@ and you may want to double check the first two arguments.
 - Due to the *position-independent* feature, code in shared library often use PC-relative
 address to access a function/variable. This implicitly demands segments to be mapped at
 the address according to the program header table(remember VirtAddr?). 
-Though the address of the first mappingdoes not matter(like `NULL` above), 
+Though the address of the first mapping does not matter(like `NULL` above), 
 the following mappings probably need fixed address.
+---
 
 Alright, the memory mappings are now ready to go. 
 Now, to make `FindSymbol` able to find a function provided by this library, 
@@ -235,6 +252,7 @@ which can never be true because it is protected by kernel.
 Thus, we need to find the correct base address of the library.
 Assume that address is `0x555555000000`, and then the symbol table will be at `0x555555000318`.
 
+---
 Getting back to what you need to implement: 
 The internal data structure `LinkMap` in `src/Link.h` is designed to share info among all modules,
 like `addr` indicating the base address, and `dynInfo` containing every entry inside dynamic section,
