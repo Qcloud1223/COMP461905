@@ -78,8 +78,6 @@ static void fill_info(LinkMap *lib)
 
 void *MapLibrary(const char *name)
 {
-    /* Your code here */
-
     /*
      * hint:
      * 
@@ -97,5 +95,7 @@ void *MapLibrary(const char *name)
      * 
      * return lib;
     */
+   
+    /* Your code here */
     return NULL;
 }

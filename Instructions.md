@@ -45,9 +45,9 @@ a library and decide how to deal with them. For example, the loader needs to loa
 There are some useful commands you can use to inspect a library:
 ```bash
 # need to install binutils first
-# print each segment of a library
+# print each program header of a library
 $ readelf -l ./test_lib/SimpleData.so
-# print each section of a library
+# print each section header of a library
 $ readelf -S ./test_lib/SimpleData.so
 # print the dynamic section of a library
 $ readelf -d ./test_lib/SimpleData.so
@@ -114,6 +114,7 @@ typedef struct
   Elf64_Xword	p_memsz;		/* Segment size in memory */
   Elf64_Xword	p_align;		/* Segment alignment */
 } Elf64_Phdr;
+// Phdr is short for "program header"
 ```
 And the file header of this library tells us where we can traverse these segments:
 ```c
@@ -132,9 +133,12 @@ typedef struct
   **Elf64_Half	e_phnum;**		/* Program header table entry count */
   ...
 } Elf64_Ehdr;
+// Ehdr is short for "ELF header"
 ```
-So, to pinpoint the segments, we need to find *program header table*,
+So, to pinpoint the segments, we need to find **program header table**,
 which stores the information we see in `readelf -l`.
+So called **program header** is actually an abstract of a segment, containing
+information shown in the fields of `Elf64_Phdr`.
  
 First, we need to find out the *ELF header*, or `Elf64_Ehdr` above.
 It always starts at offset 0 of an ELF file, so use `read()`, `fread()`, or `pread()`
@@ -144,6 +148,10 @@ to read `sizeof(Elf64_Ehdr)` number of bytes can find that.
 the size of each entry in program header table, and the number of program headers in it.
 Again, you can use the file operation you like to load the table into a buffer,
 and then traverse it to get information of each segment.
+
+To sum up, the working order would be:
+
+`Elf64_Ehdr` -> `e_phoff` -> `Elf64_Phdr` -> `p_type`, `p_offset`, ...
 
 Once we have found a segment, it's time we load it into memory.
 `mmap()` is intended for this. It create a mapping from a file in the disk to somewhere in the memory,
@@ -163,12 +171,26 @@ int prot = 0;
 prot |= (first_segment->prot && PF_R)? PROT_READ : 0;
 prot |= (first_segment->prot && PF_W)? PROT_WRITE : 0;
 prot |= (first_segment->prot && PF_X)? PROT_EXEC : 0;
+// NULL means "allow OS to pick up address for you"
 void *start_addr = mmap(NULL, ALIGN_UP(first_segment->p_memsz, getpagesize()), prot, 
      MAP_FILE | MAP_PRIVATE, fd, first_segment->offset);
 ```
-One subtle thing you need to notice is that `PF_R` is used to signify a *segment* has read permission,
+Few things you need know:
+
+- `PF_R` is used to signify a *segment* has read permission,
 while `PROT_READ` is used to show a *virtual memory page* has read permission.
 We need to convert that when calling `mmap()`.
+
+- `mmap()` has alignment requirement, expecting the beginning and end of this call 
+exactly on a page boundary(you should understand this after learing virtual memory).
+The macros `ALIGN_UP` and `ALIGN_DOWN` in `src/MapLibrary.c` are prepared for that,
+and you may want to double check the first two arguments.
+
+- Due to the *position-independent* feature, code in shared library often use PC-relative
+address to access a function/variable. This implicitly demands segments to be mapped at
+the address according to the program header table(remember VirtAddr?). 
+Though the address of the first mappingdoes not matter(like `NULL` above), 
+the following mappings probably need fixed address.
 
 Alright, the memory mappings are now ready to go. 
 Now, to make `FindSymbol` able to find a function provided by this library, 
