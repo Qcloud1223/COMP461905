@@ -46,10 +46,154 @@ There are some useful commands you can use to inspect a library:
 ```bash
 # need to install binutils first
 # print each segment of a library
-readelf -l ./test_lib/SimpleData.so
+$ readelf -l ./test_lib/SimpleData.so
 # print each section of a library
-readelf -S ./test_lib/SimpleData.so
+$ readelf -S ./test_lib/SimpleData.so
 # print the dynamic section of a library
-readelf -d ./test_lib/SimpleData.so
+$ readelf -d ./test_lib/SimpleData.so
 ```
 
+If you don't understand how things go, that's OK. Next we will go through each testcase, and show you what you need to do,
+with more details of ELF format.
+
+### Testcases
+
+#### test0: load a library
+This test only requires you to map a shared library into memory(the location does not matter).
+And it is pretty obvious we need to know that:
+- Where can I find the file
+- Which part of the file needs loading
+
+For the first question, all the testcases come with their absolute path, like `./test_lib/SimpleMul.so`, 
+instead of `SimpleMul.so`. If it is the latter case, the loader will need to search for a bunch of directories
+to find out where the library is. We will see more about this in the next testcase.
+
+Therefore, find and access this file in your filesystem is quite straightforward now. Just simple C-style file operations.
+
+The second question is a little complicated, and we will first see the segments of this library:
+```bash
+$ readelf -l ./test_lib/SimpleMul.so
+
+...
+# The number of LOAD segment varies under different linkers
+Program Headers:
+  Type           Offset             VirtAddr           PhysAddr
+                 FileSiz            MemSiz              Flags  Align
+  LOAD           0x0000000000000000 0x0000000000000000 0x0000000000000000
+                 0x00000000000004b0 0x00000000000004b0  R      0x1000
+  LOAD           0x0000000000001000 0x0000000000001000 0x0000000000001000
+                 0x000000000000011d 0x000000000000011d  R E    0x1000
+  LOAD           0x0000000000002000 0x0000000000002000 0x0000000000002000
+                 0x00000000000000a4 0x00000000000000a4  R      0x1000
+  LOAD           0x0000000000002e80 0x0000000000003e80 0x0000000000003e80
+                 0x00000000000001a0 0x00000000000001a8  RW     0x1000
+
+...
+```
+Remember that we need to load the `PT_LOAD` segments? The segment with type `LOAD` is exactly the case.
+Then, `readelf` gives us some other useful information:
+
+`Offset`: the offset in number of bytes of this segment in the file
+`VirtAddr`: where this segment should start in virtual memory
+`PhysAddr`: ignored
+`FileSiz`: the size of the segment inside filesystem
+`MemSiz`: the size of the segment when loaded into memory
+`Flags`: permission of this segment
+`Align`: alignment requirement in virtual memory
+
+The header <elf.h> shows us where we can find these information in our C program:
+```c
+typedef struct
+{
+  Elf64_Word	p_type;			/* Segment type */
+  Elf64_Word	p_flags;		/* Segment flags */
+  Elf64_Off	    p_offset;		/* Segment file offset */
+  Elf64_Addr	p_vaddr;		/* Segment virtual address */
+  Elf64_Addr	p_paddr;		/* Segment physical address */
+  Elf64_Xword	p_filesz;		/* Segment size in file */
+  Elf64_Xword	p_memsz;		/* Segment size in memory */
+  Elf64_Xword	p_align;		/* Segment alignment */
+} Elf64_Phdr;
+```
+And the file header of this library tells us where we can traverse these segments:
+```c
+typedef struct
+{
+  unsigned char	e_ident[EI_NIDENT];	/* Magic number and other info */
+  Elf64_Half	e_type;			/* Object file type */
+  Elf64_Half	e_machine;		/* Architecture */
+  Elf64_Word	e_version;		/* Object file version */
+  Elf64_Addr	e_entry;		/* Entry point virtual address */
+  **Elf64_Off  e_phoff;**		/* Program header table file offset */
+  Elf64_Off	    e_shoff;		/* Section header table file offset */
+  Elf64_Word	e_flags;		/* Processor-specific flags */
+  Elf64_Half	e_ehsize;		/* ELF header size in bytes */
+  **Elf64_Half	e_phentsize;**		/* Program header table entry size */
+  **Elf64_Half	e_phnum;**		/* Program header table entry count */
+  ...
+} Elf64_Ehdr;
+```
+Once we have found a segment, it's time we load it into memory.
+`mmap()` is intended for this. It create a mapping from a file in the disk to somewhere in the memory,
+and this is what is called "loading a file into memory" throughout this document.
+Use `mmap()` to create mappings for each segment, and you can find more about mmap in this man page:
+https://man7.org/linux/man-pages/man2/mmap.2.html
+
+Alright, the memory mappings are now ready to go. 
+Now, to make `FindSymbol` able to find a function provided by this library, 
+we need to store the location of **symbol table** and **string table**.
+
+A symbol table contains the information of all the symbols(a function or global variable), and the 
+string table contains the name corresponds to each symbol. The definition can also be found in 
+<elf.h>:
+```c
+typedef struct
+{
+  Elf64_Word	st_name;		/* Symbol name (string tbl index) */
+  unsigned char	st_info;		/* Symbol type and binding */
+  unsigned char st_other;		/* Symbol visibility */
+  Elf64_Section	st_shndx;		/* Section index */
+  Elf64_Addr	st_value;		/* Symbol value */
+  Elf64_Xword	st_size;		/* Symbol size */
+} Elf64_Sym;
+```
+You need not fully understand how a symbol works because symbol searching is handled for you.
+
+Let's check the dynamic section of this library:
+```bash
+readelf -d ./test_lib/SimpleMul.so
+
+  Tag        Type                         Name/Value
+ ...
+ 0x0000000000000005 (STRTAB)             0x3a8
+ 0x0000000000000006 (SYMTAB)             0x318
+ ...
+```
+This gives the address of string table and symbol table in virtual memory. 
+However, it assumes that the library are mapped into memory starting from `0x0`, 
+which can never be true because it is protected by kernel.
+
+Thus, we need to find the correct base address of the library.
+Assume that address is `0x555555000000`, and then the symbol table will be at `0x555555000318`.
+
+Getting back to what you need to implement: 
+The internal data structure `LinkMap` in `src/Link.h` is designed to share info among all modules,
+like `addr` indicating the base address, and `dynInfo` containing every entry inside dynamic section,
+including location of symbol table(`dynInfo[DT_SYMTAB]`) and string table(`dynInfo[DT_STRTAB]`).
+
+Find the correct base address returned by `mmap()`, store it in `addr`.
+Calculate the real address of dynamic segment with that base address, store it in `dyn`.
+And the helper functions in `src/MapLibrary.c` will do the job left.
+
+Congrats! You've finished 80% of this project!
+
+<!-- For the first question, we can first look into `src/MapLibrary.c`:
+```c
+// system path may vary under different operating systems
+static const char *sys_path[] = {
+    "/usr/lib/x86_64-linux-gnu/",
+    "/lib/x86_64-linux-gnu/",
+    ""
+};
+```
+The loader will typically configure some directories to search on default -->
