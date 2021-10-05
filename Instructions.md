@@ -25,7 +25,7 @@ have minor differences. This will **NOT** cause problems when you trying to fini
 some problems when verifying your submissions, because your code is only tested under your environment.
 
 Thus, it is highly recommended to use Ubuntu 18.04 or 20.04, where you can have the exact environment with me. Yet you can
-use a different distribution if you really want that, and in that case please send me your setup.
+use a different distribution if you really want that, and in that case please send me your environment and settings.
 
 If you never use Linux before, that's OK. You can always use a virtual machine.
 <!-- TODO: add installing Linux, a link or another tutorial -->
@@ -94,11 +94,17 @@ Remember that we need to load the `PT_LOAD` segments? The segment with type `LOA
 Then, `readelf` gives us some other useful information:
 
 `Offset`: the offset in number of bytes of this segment in the file
+
 `VirtAddr`: where this segment should start in virtual memory
+
 `PhysAddr`: ignored
+
 `FileSiz`: the size of the segment inside filesystem
+
 `MemSiz`: the size of the segment when loaded into memory
+
 `Flags`: permission of this segment
+
 `Align`: alignment requirement in virtual memory
 
 The header <elf.h> shows us where we can find these information in our C program:
