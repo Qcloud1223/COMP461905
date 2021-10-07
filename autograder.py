@@ -7,6 +7,8 @@ import sys
 VOID_VOID = '0'
 INT_INTINT = '1'
 
+INT_INTINT_L = 1 << 4
+
 class TestCase:
 
     dlopenExe = './build/run-dlopen'
@@ -19,6 +21,7 @@ class TestCase:
         self.funcType = funcType
         self.extraArg = len(args)
         self.args = args
+        self.craftAns = 0
 
     def assign_score(self, score):
         self.score = score
@@ -33,6 +36,10 @@ class TestCase:
         if self.extraArg:
             self.debugArg.extend(self.args)
         subprocess.call(self.debugArg)
+    
+    def add_answer(self, ans):
+        self.craftAns = 1
+        self.ans = ans.decode("utf-8")
     
     def run_task(self):
         print("Test name:", self.testName)
@@ -72,14 +79,18 @@ class TestCase:
                     print("Bad return code:", e.returncode)
                 return
             else:
-                if RetProc.stdout == DLProc.stdout:
+                if self.craftAns:
+                    realAns = self.ans
+                else:
+                    realAns = DLProc.stdout
+                if RetProc.stdout == realAns:
                     self.claimedScore += self.score
-                    print("Expected output:", DLProc.stdout)
+                    print("Expected output:", realAns)
                     print("Your output:", RetProc.stdout)
                     print("Passed!")
                 else:
                     print("TestCase failed.")
-                    print("Expected output:", DLProc.stdout)
+                    print("Expected output:", realAns)
                     print("Your output:", RetProc.stdout)
 
 def pretty_print(i):
@@ -116,16 +127,21 @@ if __name__ == '__main__':
     test4.assign_score(3)
     test4.assign_name('one global data relocation')
     allTests.append(test4)
-    test4 = TestCase('IndirectDep', 'wrapperAgain', INT_INTINT, '2', '3')
-    test4.assign_score(2)
-    test4.assign_name('one 2-layer relocation')
-    allTests.append(test4)
-    # TODO: add lazy relocation tests
+    test5 = TestCase('IndirectDep', 'wrapperAgain', INT_INTINT, '2', '3')
+    test5.assign_score(2)
+    test5.assign_name('one 2-layer relocation')
+    allTests.append(test5)
+    test6 = TestCase('SimpleDep', 'wrapper', str(INT_INTINT_L), '2', '3')
+    test6.assign_score(2)
+    test6.assign_name('lazy binding')
+    test6.add_answer(b'Resolving address for entry 0\n6\n')
+    allTests.append(test6)
     # sanity tests end
     """
         further tests can include: 
         order-related init; 
         rpath handling(single and multi layer);
+        register saving in assembly;
         these tests are kinda like corner cases and contradict the goal of this project 
     """
 

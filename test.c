@@ -22,7 +22,11 @@ int main(int argc, char *argv[], char *env[])
 #ifdef USE_DLOPEN
     void *handle = dlopen(argv[1], RTLD_LAZY);
 #else
-    void *handle = OpenLibrary(argv[1], BIND_NOW);
+    void *handle;
+    if (atoi(argv[3]) < (1 << 4))
+        handle = OpenLibrary(argv[1], BIND_NOW);
+    else
+        handle = OpenLibrary(argv[1], LAZY_BIND);
 #endif    
     if(!handle)
     {
@@ -35,6 +39,10 @@ int main(int argc, char *argv[], char *env[])
     }
 
     int func_type = atoi(argv[3]);
+    // there is no difference between lazy binding and non-lazy one in FindSymbol
+    // so we shift it back for *_L == * << 4
+    if (func_type >= (1 << 4))
+        func_type >>= 4;
     switch (func_type)
     {
         case VOID_VOID:
