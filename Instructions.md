@@ -331,7 +331,7 @@ the type of a relocation and symbol index, which use lower and upper 32 bit of a
 `(2 << 32) | 7`. Its relocation type is `R_X86_64_JUMP_SLOT`, defined as `7` that can be found in <elf.h>.
 `2` means its index is 2 in symbol table.
 
-(Feel free to ignore the output if you are lost. It's just a verification)
+(Feel free to ignore the content from here to next separation line if you are lost. It's just a verification)
 ```bash
 $ objdump -s ./test_lib/lib1.so
 Contents of section .dynsym:
