@@ -5,7 +5,7 @@
 // of both linker
 #include <stdio.h>
 __attribute__((constructor))
-void init()
+static void init()
 {
     printf("Init is called\n");
 }
