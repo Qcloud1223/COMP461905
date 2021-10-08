@@ -142,6 +142,8 @@ if __name__ == '__main__':
         order-related init; 
         rpath handling(single and multi layer);
         register saving in assembly;
+        relocation with addend;
+        various relocation types;
         these tests are kinda like corner cases and contradict the goal of this project 
     """
 
