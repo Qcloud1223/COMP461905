@@ -520,6 +520,33 @@ required in this project, and you can find out more in `DT_RUNPATH` entry in dyn
 You can treat `./test_lib` or `/path/to/repo/test_lib` as a system path in this project
 and solve all the problems.
 
+Once you find all the dependency of a library, store it in `searchList` of `LinkMap`. This can be
+used for later relocation.
+
 OK, the task for you is clear: find and load the dependency of the library you are loading,
 and finish the *real* relocation process by `findSymbol`.
 
+#### test 4: relocate global variables
+Now we talk about the last relocation type in this project: `R_X86_64_GLOB_DAT`. 
+There is no big difference between this one and the previous two, so details will be excluded.
+
+The relocation entries for global variables are also in `.rela.dyn`, mixed with relative entries.
+The way to locate it is using `DT_RELACOUNT`, the number of relative relocations.
+`DT_RELASZ` gives the total size of the `.rela.dyn`, and the number of non-relative relocations 
+can be calculated from them.
+
+Note that `DT_RELACOUNT` is a GNU extension (defined to `0x0x6ffffff9`), 
+and in this project I define `DT_RELACOUNT_NEW` to `DT_NUM` (34), 
+so that it can be directly stored in the `dynInfo` field of `LinkMap`.
+You can check this behavior in `fill_info` at `src/MapLibrary.c`.
+
+The address to be filled in relocation entry can also be returned by `findSymbol`, identical to 
+`R_X86_64_JUMP_SLOT`.
+
+#### test 5: deal with dependency tree
+If you are careful enough, you should have found it in test 3: What if the dependencies of the 
+dependencies? `DT_NEEDED` only records the direct dependencies, that is, a library will only 
+appear as a `DT_NEEDED` of another library if its function is referred by that library.
+
+That means introducing a dependency will introduce new dependencies. Finally, opening a library
+will introduce a dependency tree, and you need to use BFS to map it all.
