@@ -131,6 +131,8 @@ if __name__ == '__main__':
     test5.assign_score(2)
     test5.assign_name('one 2-layer relocation')
     allTests.append(test5)
+    # TODO: check whether the second call still calls trampoline
+    # requires a distinct function type
     test6 = TestCase('SimpleDep', 'wrapper', str(INT_INTINT_L), '2', '3')
     test6.assign_score(2)
     test6.assign_name('lazy binding')
@@ -144,6 +146,7 @@ if __name__ == '__main__':
         register saving in assembly;
         relocation with addend;
         various relocation types;
+        syspath searching;
         these tests are kinda like corner cases and contradict the goal of this project 
     """
 
