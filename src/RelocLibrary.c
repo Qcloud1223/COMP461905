@@ -18,9 +18,9 @@ dl_new_hash(const char *s)
     return h & 0xffffffff;
 }
 
+// find symbol `name` inside the symbol table of `dep`
 void *symbolLookup(LinkMap *dep, const char *name)
 {
-    // find symbol `name` inside the symbol table of `dep`
     if(dep->fake)
     {
         void *handle = dlopen(dep->name, RTLD_LAZY);
@@ -54,14 +54,13 @@ void *symbolLookup(LinkMap *dep, const char *name)
                 if (((*hasharr ^ new_hash) >> 1) == 0)
                 {
                     symidx = hasharr - dep->l_gnu_chain_zero;
-                    /* now, symtab[symidx] is the current symbol
-                        hash table has done all work and can be stripped */
+                    /* now, symtab[symidx] is the current symbol.
+                       Hash table has done its job */
                     const char *symname = strtab + symtab[symidx].st_name;
-                    /* FIXME: check the visibility and strong/weak of the found symbol */
-                    /* FIXME: make sure no local symbols like "tmp" will be accessed here! */
                     if (!strcmp(symname, name))
                     {    
                         Elf64_Sym *s = &symtab[symidx];
+                        // return the real address of found symbol
                         return (void *)(s->st_value + dep->addr);
                     }
                 }
