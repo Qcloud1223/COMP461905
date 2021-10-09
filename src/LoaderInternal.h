@@ -10,6 +10,6 @@ void *MapLibrary(const char *name);
 void RelocLibrary(LinkMap *l, int mode);
 void InitLibrary(LinkMap *l);
 void *symbolLookup(LinkMap *dep, const char *name);
-void trampoline(Elf64_Word idx);
+void trampoline(void);
 
 #endif /* LoaderInternal.h */
