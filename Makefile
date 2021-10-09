@@ -5,7 +5,9 @@ LOADER-SAMPLE-SRC = $(addprefix src/orig/,OpenLibrary.c MapLibrary.c RelocLibrar
 						FindSymbol.c RuntimeResolve.c trampoline.S InitLibrary.c)
 TST-LIBS          = $(addprefix test_lib/,lib1.so SimpleMul.so SimpleIni.so SimpleData.so)
 
-CFLAGS = -g -shared -fPIC
+# TODO: check gcc version to conditionally disable fcf
+# early version could complain about this flag
+CFLAGS = -g -shared -fPIC -fcf-protection=none
 LDFLAGS = -ldl
 CUSTOM-LDR = -L./build -Wl,-rpath,./build -l:loader-sample.so
 REAL-LDR = -L./build -Wl,-rpath,./build -l:loader.so
