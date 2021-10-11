@@ -57,6 +57,10 @@ If you don't understand how things go, that's OK. Next we will go through each t
 with more details of ELF format.
 
 ### Testcases
+The remaining of this document explains what is covered in each test case, and how you can finish them.
+
+Note that the sections starting with *More on* provides some supplmentary information which you might or
+might not need, and you can feel free to skip them if you don't know what they are talking about.
 
 #### test0: load a library
 This test only requires you to map a shared library into memory(the location does not matter).
@@ -282,9 +286,20 @@ what you are trying to load.
 
 Although different OS has different `libc` (and you can specify it if you want), the way we use them here is 
 unified. **We directly ask `libc` for real address, instead of finding it on our own**. This is pretty much like
-turning you textbook to last pages for standard solution when you are doing your homework.(BTW, I do it all the time)
+turning you textbook to last pages for standard solution when you are doing your homework. (BTW, I do it all the time)
+I call it the *fake loading* of `libc`.
 
-The way to achieve this is to use `dlsym`:
+---
+*More on fake loading:* The reason why we use fake loading is because it is **very hard** to handle `glibc` ourselves, 
+and it is tightly coupled with the system dynamic loader `ld-linux.so.2`. 
+
+You can find more info on this at: https://sourceware.org/pipermail/libc-help/2021-January/005615.html
+
+What will happen if you *have to map it*: Mainly because some of the global variables are not initialized, when you call
+some of the functions, they will segfault, while some of them will **function normally**, making it hard to debug.
+
+---
+The way to achieve fake loading is to use `dlsym`:
 ```c
 void *handle = dlopen("libc.so.6", RTLD_LAZY);
 void *address = dlsym(handle, "symbol_name");
@@ -331,7 +346,7 @@ the type of a relocation and symbol index, which use lower and upper 32 bit of a
 `(2 << 32) | 7`. Its relocation type is `R_X86_64_JUMP_SLOT`, defined as `7` that can be found in <elf.h>.
 `2` means its index is 2 in symbol table.
 
-(Feel free to ignore the content from here to next separation line if you are lost. It's just a verification)
+
 ```bash
 $ objdump -s ./test_lib/lib1.so
 Contents of section .dynsym:
@@ -512,6 +527,8 @@ For each of the library the linker finds has dependency with the current file we
 `DT_NEEDED` entry in the dynamic section.
 So we need to get back to phase 1, when we are mapping the library, we need to also map its dependencies as well.
 Otherwise we cannot look up symbols in them.
+Note that you can also deal with `libc` in test 2, and `fake` and `fakeHandle` in `LinkMap` is to indicate
+a library we currently cannot use directly.
 
 We need to find out where are these dependencies. A typical loader defines such thing as *default path* or *system path*
 to unconditionally search in those directories, and users can specify the some paths themself during linking.
