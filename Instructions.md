@@ -240,6 +240,8 @@ typedef struct
 You need not fully understand how a symbol works because symbol searching is handled for you.
 
 Let's check the dynamic section of this library:
+<!-- TODO: all the address is shifted, maybe because plt is not fused anymore.
+           Correct all the addresses in text and more-ons -->
 ```bash
 readelf -d ./test_lib/SimpleMul.so
 
@@ -336,7 +338,6 @@ Though you can find a better and more comprehensive discussion at:
 http://bottomupcs.sourceforge.net/csbu/x3735.htm ,
 I will give a TL;DR version like test 0.
 
-<!-- TODO: add a figure of reloc table(~0x500) pointing to each entry in GOT and PLT(~0x4000) -->
 `r_offset` means the offset where the address should fill, and `r_info` is a multiplex of two fields:
 the type of a relocation and symbol index, which use lower and upper 32 bit of a `uint64_t` respectively.
 `r_addend` is something to be added to the address found when trying to write this entry.
@@ -381,9 +382,11 @@ $ readelf -d ./test_lib/lib1.so
  ...
  0x0000000000000002 (PLTRELSZ)           24 (bytes)
  0x0000000000000014 (PLTREL)             RELA
- 0x0000000000000017 (JMPREL)             0x510
+ 0x0000000000000017 (JMPREL)             0x480
  ...
 ```
+Here is an image on all the sections talked above, hopefully it can help you understand this process better.
+![Some text](./img/plt-cut.png)
 
 So again, the problem is broken into pieces: 
 
