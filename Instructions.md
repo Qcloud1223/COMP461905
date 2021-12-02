@@ -2,6 +2,7 @@
 
 Greetings! This guide will show you the basics of this project, and how to finish it:)
 <!-- TODO: more smooth intro -->
+<!-- TODO: Maybe I should break the instruction for each test case -->
 ### Goals
 As you may learn from CS:APP Chapter 7, this project is a minimal simulation of the vital part of a operating system, a dynamic
 loader, which load shared objects(libraries) into process memory. 
@@ -622,3 +623,27 @@ address. `trampoline` then jumps to the address found, and the lazy relocation i
 
 In the second call to `0x1030`, `0x4018` now contains the actual address, and `multiply` will be called
 directly instead of `trampoline`.
+
+### Useful information
+I hope this instruction and the course slides help you get (at least part of) familar with dynamic linking.
+If you are still somehow confused, or just want to learn more, I would recommend you reading the 
+following materials:
+
+- [A rebuild of dynamic linker in one 300-line C file](https://github.com/jserv/min-dl). This implementation
+is very short but will help you a lot in having a big picture of what we will do. However, it requires the
+shared libraries to use some user-defined section(*i.e.* `.my_pltgot`), as well as not handling the dependency
+tree and initialization. These flaws make it not practial, and even not a **linker**.
+
+- [The source code of `glibc`](https://ftp.gnu.org/gnu/glibc/). Go download a copy of `glibc` source code, and
+see how the dynamic linker running many Linux distributions works...just kidding. Simpling digging into 
+`glibc`'s source code is an extremely painful experience and I highly recommend you not to do that if you 
+just want to finish this project, for there are tons of historical and compatibility issues.
+This is only for those who want to make things crystal clear. Go to `dlfcn/dlopen.c` to see why I said 
+`dlopen` is only a wrapper, and check `elf/dl-load.c`, `elf/dl-reloc.c`, `elf/dl-init.c` and more.
+
+- [UCI 238P HW3](https://www.ics.uci.edu/~aburtsev/238P/hw/hw3-elf/hw3-elf.html). This project is originally
+inspired by this one, and you can find many useful information like ELF format and (a little bit of) relocation.
+Note that this project focus on loading an **ELF executable** into arbitrary location of process memory, while 
+our project focus on **ELF shared library**. The former is handled by the kernel by default, and users would 
+not do that a lot. Being able to identify the differences between the two projects means that you understand 
+the toolchain well.
