@@ -5,8 +5,10 @@ LOADER-SAMPLE-SRC = $(addprefix src/orig/,OpenLibrary.c MapLibrary.c RelocLibrar
 						FindSymbol.c RuntimeResolve.c trampoline.S InitLibrary.c)
 TST-LIBS          = $(addprefix test_lib/,lib1.so SimpleMul.so SimpleIni.so SimpleData.so)
 
-# TODO: check gcc version to conditionally disable fcf
-# early version could complain about this flag
+# https://wiki.ubuntu.com/ToolChain/CompilerFlags
+# Thanks to Ubuntu Wiki, I know that control flow protection was introduced since 19.04
+# But I can't tell the accurate gcc version for it is even OS-dependent
+# At the end of day I decide to keep things broken and enable it only on 20.04  
 CFLAGS = -g -shared -fPIC
 GCCVERSIONGTEQ9 := $(shell expr `gcc -dumpversion | cut -f1 -d.` \>= 9)
 ifeq "$(GCCVERSIONGTEQ9)" "1"
