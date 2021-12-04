@@ -21,6 +21,11 @@ First of all, you need a Linux environment to finish this project.
 This could be a WSL(Windows Subsystem for Linux), a virtual machine, or a desktop/server version of any Linux distribution.
 No further libraries are needed.
 
+**Update**: Make sure that you are using a 64-bit Linux system, because in this project we assume that a pointer has 
+a length of 8 bytes. If you are already using a 32-bit OS, you will be able to see some warnings when trying to `make`
+(otherwise none).
+**Please do not ignore that and get a 64-bit OS.** 
+
 However, due to the various implementations of linker on those distributions, the shared libraries produced by them will 
 have minor differences. This will **NOT** cause problems when you trying to finish this project, but **will** cause me 
 some problems when verifying your submissions, because your code is only tested under your environment.
