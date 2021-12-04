@@ -7,7 +7,11 @@ TST-LIBS          = $(addprefix test_lib/,lib1.so SimpleMul.so SimpleIni.so Simp
 
 # TODO: check gcc version to conditionally disable fcf
 # early version could complain about this flag
-CFLAGS = -g -shared -fPIC -fcf-protection=none
+CFLAGS = -g -shared -fPIC
+GCCVERSIONGTEQ9 := $(shell expr `gcc -dumpversion | cut -f1 -d.` \>= 9)
+ifeq "$(GCCVERSIONGTEQ9)" "1"
+	CFLAGS += -fcf-protection=none
+endif
 LDFLAGS = -ldl
 CUSTOM-LDR = -L./build -Wl,-rpath,./build -l:loader-sample.so
 REAL-LDR = -L./build -Wl,-rpath,./build -l:loader.so
