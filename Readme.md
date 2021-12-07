@@ -1,4 +1,4 @@
-## ELF dynamic loader
+## ELF dynamic linker
 A course project for the latter part of COMP461905:Operating Systems,
 Proudly at XJTU.
 
@@ -19,3 +19,8 @@ To debug individual test case, use:
 ```bash
 python autograder.py test-index
 ```
+
+### Asking questions
+If you have any question about the code and environment, please raise an [issue](https://github.com/Qcloud1223/COMP461905/issues).
+
+For questions about grading or something else, feel free to shoot me an e-mail.
