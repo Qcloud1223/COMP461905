@@ -11,8 +11,11 @@ make
 To get you hands on this project, check `Instructions.md` for a step-by-step tutorial.
 
 ### Evaluate your code
+**Update: Please use python>=3.5**
+
 To review your submission as a whole, use:
 ```bash
+# you may have to run it with python3 if python points to python2
 python autograder.py
 ```
 To debug individual test case, use:
