@@ -200,9 +200,9 @@ memory. Therefore, we need to call `mmap()` like this:
 // Elf64_Phdr *first_segment;
 // int fd = open(path_to_library);
 int prot = 0;
-prot |= (first_segment->prot && PF_R)? PROT_READ : 0;
-prot |= (first_segment->prot && PF_W)? PROT_WRITE : 0;
-prot |= (first_segment->prot && PF_X)? PROT_EXEC : 0;
+prot |= (first_segment->prot & PF_R)? PROT_READ : 0;
+prot |= (first_segment->prot & PF_W)? PROT_WRITE : 0;
+prot |= (first_segment->prot & PF_X)? PROT_EXEC : 0;
 // NULL means "allow OS to pick up address for you"
 void *start_addr = mmap(NULL, ALIGN_UP(first_segment->p_memsz, getpagesize()), prot, 
      MAP_FILE | MAP_PRIVATE, fd, first_segment->offset);
