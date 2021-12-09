@@ -5,6 +5,8 @@ LOADER-SAMPLE-SRC = $(addprefix src/orig/,OpenLibrary.c MapLibrary.c RelocLibrar
 						FindSymbol.c RuntimeResolve.c trampoline.S InitLibrary.c)
 TST-LIBS          = $(addprefix test_lib/,lib1.so SimpleMul.so SimpleIni.so SimpleData.so)
 
+USE-CUSTOM-LDR ?= F
+
 # https://wiki.ubuntu.com/ToolChain/CompilerFlags
 # Thanks to Ubuntu Wiki, I know that control flow protection was introduced since 19.04
 # But I can't tell the accurate gcc version for it is even OS-dependent
@@ -14,11 +16,18 @@ GCCVERSIONGTEQ9 := $(shell expr `gcc -dumpversion | cut -f1 -d.` \>= 9)
 ifeq "$(GCCVERSIONGTEQ9)" "1"
 	CFLAGS += -fcf-protection=none
 endif
-LDFLAGS = -ldl
-CUSTOM-LDR = -L./build -Wl,-rpath,./build -l:loader-sample.so
-REAL-LDR = -L./build -Wl,-rpath,./build -l:loader.so
 
-all: loader libs test
+LDFLAGS = -ldl
+LDR = -L./build -Wl,-rpath,./build
+ifeq "$(USE-CUSTOM-LDR)" "F"
+	LDR += -l:loader.so
+	ALL-OBJ = loader libs test
+else
+	LDR += -l:loader-sample.so
+	ALL-OBJ = loader-sample libs test
+endif
+
+all: $(ALL-OBJ)
 
 # sample loader and skeleton loader library
 loader: build/loader.so
@@ -58,8 +67,7 @@ build/run-dlopen: test.c
 	$(CC) -g -DUSE_DLOPEN=1 -o $@ $< $(LDFLAGS)
 
 build/run-openlib: test.c
-	$(CC) -g -o $@ $< $(REAL-LDR)
-#  $(CC) -g -o $@ $< $(CUSTOM-LDR)
+	$(CC) -g -o $@ $< $(LDR)
 
 clean:
 	rm -f build/loader.so build/loader-sample.so build/run-dlopen build/run-openlib
