@@ -49,10 +49,18 @@ class TestCase:
             argList.extend(self.args)
         try:
             # print(argList)
-            # The reason why somtimes I do not want to encode it is that it can print non-utf8 char
+            # The reason why sometimes I do not want to encode it is that it can print non-utf8 char
             # typically from an uninitialized buffer
-            RetProc = subprocess.run(argList, check=True, capture_output=True, encoding='utf-8')
-            # RetProc = subprocess.run(argList, check=True, capture_output=True)
+            if sys.version_info >= (3, 7, 0):
+                RetProc = subprocess.run(argList, check=True, capture_output=True, encoding='utf-8')
+                # RetProc = subprocess.run(argList, check=True, capture_output=True)
+            else:
+                RetProc = subprocess.run(argList, check=True, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+                # print(type(RetProc), type(RetProc.stdout))
+                #   -> subprocess.CompletedProcess, bytes
+                RetProc.stdout = RetProc.stdout.decode('utf-8')
+                RetProc.stderr = RetProc.stderr.decode('utf-8')
+        # I get lazy and don't decode the error string, for we do not need it to compare
         except subprocess.CalledProcessError as e:
             if e.returncode == -signal.SIGSEGV:
                 print("SIGSEGV received in custom loader. Maybe you want to debug it with gdb.")
@@ -67,8 +75,13 @@ class TestCase:
             argList[0] = self.dlopenExe
             try:
                 # print(argList)
-                DLProc = subprocess.run(argList, check=True, capture_output=True, encoding='utf-8')
-                # DLProc = subprocess.run(argList, check=True, capture_output=True)
+                if sys.version_info >= (3, 7, 0):
+                    DLProc = subprocess.run(argList, check=True, capture_output=True, encoding='utf-8')
+                    # DLProc = subprocess.run(argList, check=True, capture_output=True)
+                else:
+                    DLProc = subprocess.run(argList, check=True, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+                    DLProc.stdout = DLProc.stdout.decode('utf-8')
+                    DLProc.stderr = DLProc.stderr.decode('utf-8')
             except subprocess.CalledProcessError as e:
                 if e.returncode == -signal.SIGSEGV:
                     print("SIGSEGV received while dlopen. Please contact the TA.")
@@ -106,6 +119,9 @@ def pretty_print(i):
     print()
 
 if __name__ == '__main__':
+    if sys.version_info < (3, 5, 0):
+        print("Your python version is too low, please update it to be at least 3.5")
+        quit()
     allTests = []
     test0 = TestCase('SimpleMul', 'multiply', INT_INTINT, '2', '3')
     test0.assign_score(80)
