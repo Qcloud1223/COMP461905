@@ -205,7 +205,7 @@ prot |= (first_segment->prot & PF_W)? PROT_WRITE : 0;
 prot |= (first_segment->prot & PF_X)? PROT_EXEC : 0;
 // NULL means "allow OS to pick up address for you"
 void *start_addr = mmap(NULL, ALIGN_UP(first_segment->p_memsz, getpagesize()), prot, 
-     MAP_FILE | MAP_PRIVATE, fd, first_segment->offset);
+     MAP_FILE | MAP_PRIVATE, fd, ALIGN_DOWN(first_segment->offset, getpagesize()));
 ```
 Few things you need know:
 
@@ -216,7 +216,8 @@ We need to convert that when calling `mmap()`.
 - `mmap()` has alignment requirement, expecting the beginning and end of this call 
 exactly on a page boundary(you should understand this after learing virtual memory).
 The macros `ALIGN_UP` and `ALIGN_DOWN` in `src/MapLibrary.c` are prepared for that,
-and you may want to double check the first two arguments.
+and you may want to double check the first two arguments. **Update:** The last argument
+also needs to be aligned with system page size!
 
 - Due to the *position-independent* feature, code in shared library often use PC-relative
 address to access a function/variable. This implicitly demands segments to be mapped at
