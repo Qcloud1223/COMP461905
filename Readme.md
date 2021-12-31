@@ -8,11 +8,9 @@ git clone https://github.com/Qcloud1223/COMP461905.git
 cd COMP461905
 make
 ```
-To get you hands on this project, check `Instructions.md` for a step-by-step tutorial.
+To get you hands on this project, check `instructions/` for a step-by-step tutorial.
 
 ### Evaluate your code
-**Update: Please use python>=3.5**
-
 To review your submission as a whole, use:
 ```bash
 # you may have to run it with python3 if python points to python2
