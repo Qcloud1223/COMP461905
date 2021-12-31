@@ -17,12 +17,16 @@
 
 typedef struct linkMap
 {
+    // base address of the library
     uint64_t addr;
+    // name of the library
     char *name;
+    // absolute address of dynamic segment
     Elf64_Dyn *dyn;
     struct linkMap *next;
     
     struct linkMap **searchList;
+    // a copy of dynamic segement, leave it alone
     Elf64_Dyn *dynInfo[DT_NUM + OS_SPECIFIC_FLAG];
     FILE *fs;
     // if we need the original dlopen to correctly handle this library
