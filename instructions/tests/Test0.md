@@ -225,7 +225,7 @@ We need to convert that before calling `mmap()`.
 
 - `mmap()` has alignment requirement, expecting the beginning and end of this call 
 exactly on a page boundary. As a result, you may want to double check if `addr`,
-`addr + length` and `offset` is well aligned if you find `mmap` return `NULL`.
+`addr + length` and `offset` is well aligned if you find `mmap` return `-1` (or `0xfff...`).
 
 <!-- - Due to the *position-independent* feature, code in shared library often use PC-relative
 address to access a function/variable. This implicitly demands segments to be mapped at
@@ -236,15 +236,24 @@ the following mappings probably need fixed address. -->
 - Start address of each segment. You should map the first segment using `NULL` as the first argument to
 `mmap`, because this allows the kernel to pick a address that is not in-use. Note that 
 the remaining segments **must** be consistent with their previous segment, otherwise you will fail 
-the remaining tests. Check `MAP_FIXED` in `flags` to achieve this.
+the remaining tests. Check how `MAP_FIXED` in `flags` is able to achieve this.
 
 ---
 Getting back to what you need to implement: 
-The internal data structure `LinkMap` in `src/Link.h` is designed to share info among all modules.
-Check the comments in that file to learn what all the fields mean.
 
-Find the correct base address returned by `mmap()`, store it in `addr`.
-Calculate the real address of dynamic segment with that base address, store it in `dyn`.
-And the helper functions in `src/MapLibrary.c` will do the job left.
+0. Find and open the required file, then following the aforementioned order to access each segment: 
+`Elf64_Ehdr` -> `e_phoff` -> `Elf64_Phdr` -> `p_type`, `p_offset`, ...
+
+<!-- The internal data structure `LinkMap` in `src/Link.h` is designed to share info among all modules.
+Check the comments in that file to learn what all the fields mean. -->
+
+1. Use `mmap` to map the first `LOAD` segment, and store its start address in `LinkMap`->`addr`.
+You can check the meaning of each field from the inline comments in `src/Link.h`.
+
+2. Map the remaining `LOAD` segments tightly following their previous one.
+
+3. Find the dynamic segment, and store its absolute address in `LinkMap`->`dyn`.
+
+4. Call the helper function once you are sure the previous steps are well handled.
 
 Congrats! You've finished 80% of this project!
