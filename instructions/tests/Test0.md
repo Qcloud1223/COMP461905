@@ -234,9 +234,21 @@ Though the address of the first mapping does not matter(like `NULL` above),
 the following mappings probably need fixed address. -->
 
 - Start address of each segment. You should map the first segment using `NULL` as the first argument to
-`mmap`, because this allows the kernel to pick a address that is not in-use. Note that 
-the remaining segments **must** be consistent with their previous segment, otherwise you will fail 
-the remaining tests. Check how `MAP_FIXED` in `flags` is able to achieve this.
+`mmap`, because this allows the kernel to pick a address that is not in-use. Note that you cannot
+let all the segments pick arbitrary address, because segments would use a fixed offset to access
+each other. However, we also want to retain the *position-independent* feature of shared libraries
+(see textbook 7.12). This means that the first segment should be `mmap`ed with `NULL`, and 
+the remaining consistent to the previous one. **To achieve this, you should remain enough space**
+**when trying to `mmap` the first segment, otherwise the remaining segments won't fill.**
+Check how `MAP_FIXED` in `flags` creates a new mapping on a piece of memory that may already 
+have memory mappings.
+
+<!-- ubuntu 16.04/18.04 will pass even NULL is used from the beginning to the end
+while 20.04 won't. That's why I decide not to keep MAP_FIXED as a secret (nobody discover this, tho).
+In this case it would be unfair to those using 20.04. So I write here to use MAP_FIXED here,
+and use "reserve enough space" as a challenge.
+-->
+<!-- TODO: check all-NULL mappings and fail this solution. (hard tho) -->
 
 ---
 Getting back to what you need to implement: 
