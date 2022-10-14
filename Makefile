@@ -16,15 +16,17 @@ GCCVERSIONGTEQ9 := $(shell expr `gcc -dumpversion | cut -f1 -d.` \>= 9)
 ifeq "$(GCCVERSIONGTEQ9)" "1"
 	CFLAGS += -fcf-protection=none
 endif
+# let the functions use the version as specified in source
+CFLAGS += -fno-builtin
 
 LDFLAGS = -ldl
 LDR = -L./build -Wl,-rpath,./build
 ifeq "$(USE-CUSTOM-LDR)" "F"
 	LDR += -l:loader.so
-	ALL-OBJ = loader libs test
+	ALL-OBJ = loader libs test shim
 else
 	LDR += -l:loader-sample.so
-	ALL-OBJ = loader-sample libs test
+	ALL-OBJ = loader-sample libs test shim
 endif
 
 all: $(ALL-OBJ)
@@ -68,6 +70,12 @@ build/run-dlopen: test.c
 
 build/run-openlib: test.c
 	$(CC) -g -o $@ $< $(LDR)
+
+# shim layer that is used to intercept calls to critical functions
+shim: build/libshim.so 
+
+build/libshim.so: util/shim.c 
+	$(CC) $(CFLAGS) -o $@ $< $(LDR) $(LDFLAGS) -lshim-dep
 
 clean:
 	rm -f build/loader.so build/loader-sample.so build/run-dlopen build/run-openlib
