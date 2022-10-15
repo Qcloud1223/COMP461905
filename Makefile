@@ -23,10 +23,10 @@ LDFLAGS = -ldl
 LDR = -L./build -Wl,-rpath,./build
 ifeq "$(USE-CUSTOM-LDR)" "F"
 	LDR += -l:loader.so
-	ALL-OBJ = loader libs test shim
+	ALL-OBJ = loader libs test
 else
 	LDR += -l:loader-sample.so
-	ALL-OBJ = loader-sample libs test shim
+	ALL-OBJ = loader-sample libs test
 endif
 
 all: $(ALL-OBJ)
@@ -72,10 +72,10 @@ build/run-openlib: test.c
 	$(CC) -g -o $@ $< $(LDR)
 
 # shim layer that is used to intercept calls to critical functions
-shim: build/libshim.so 
+# shim: build/libshim.so 
 
-build/libshim.so: util/shim.c 
-	$(CC) $(CFLAGS) -o $@ $< $(LDR) $(LDFLAGS) -lshim-dep
+# build/libshim.so: util/shim.c 
+# 	$(CC) $(CFLAGS) -o $@ $< $(LDR) $(LDFLAGS)
 
 clean:
 	rm -f build/loader.so build/loader-sample.so build/run-dlopen build/run-openlib
