@@ -1,3 +1,5 @@
+# DO NOT MODIFY
+
 CC = gcc
 LOADER-SRC        = $(addprefix src/,OpenLibrary.c MapLibrary.c RelocLibrary.c \
 						FindSymbol.c RuntimeResolve.c trampoline.S InitLibrary.c)
@@ -6,6 +8,10 @@ LOADER-SAMPLE-SRC = $(addprefix src/orig/,OpenLibrary.c MapLibrary.c RelocLibrar
 TST-LIBS          = $(addprefix test_lib/,lib1.so SimpleMul.so SimpleIni.so SimpleData.so)
 
 USE-CUSTOM-LDR ?= F
+
+LOADER-SRC += util/shim.c
+
+LOADER-SAMPLE-SRC += util/shim.c
 
 # https://wiki.ubuntu.com/ToolChain/CompilerFlags
 # Thanks to Ubuntu Wiki, I know that control flow protection was introduced since 19.04
@@ -79,3 +85,6 @@ build/run-openlib: test.c
 
 clean:
 	rm -f build/loader.so build/loader-sample.so build/run-dlopen build/run-openlib
+
+cleanlib:
+	rm -f test_lib/*.so

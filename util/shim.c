@@ -71,21 +71,32 @@ int myfprintf(FILE *__restrict__ __stream, const char *__restrict__ __format, ..
 static int func##_usage; \
 ret my##func(MERGE_TOKEN(__VA_ARGS__)) \
 { \
-    func(KEEP_NAME(__VA_ARGS__)); \
+    ret retval = func(KEEP_NAME(__VA_ARGS__)); \
     func##_usage++; \
+    return retval; \
 }
 
 #define PRINT_FUNC_USAGE(func) \
-printf(#func ": %d\n", func##_usage);
+fprintf(stderr, #func ": %d\n", func##_usage)
 
 FUNCTION_MACRO(dlopen, void *, const char *, name, int, mode);
-FUNCTION_MACRO(dlsym, void *, void *, handle, const char *, name);
+// FUNCTION_MACRO(dlsym, void *, void *, handle, const char *, name);
 FUNCTION_MACRO(fwrite, size_t, const void *, ptr, size_t, size, size_t, nmemb, FILE *, stream);
+
+// escape dlsym because I don't want the failed searches to generate an unreadable result
+static int dlsym_usage;
+void *mydlsym(void *__restrict __handle, const char *__restrict __name)
+{
+    void *sym = dlsym(__handle, __name);
+    if (sym)    
+        dlsym_usage++;
+    return sym;
+}
 
 __attribute__((destructor))
 void shim_summary()
 {
-    printf("program exits, retrieving shim statistics\n");
+    // printf("program exits, retrieving shim statistics\n");
     PRINT_FUNC_USAGE(printf);
     PRINT_FUNC_USAGE(fprintf);
     PRINT_FUNC_USAGE(dlopen);

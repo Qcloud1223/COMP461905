@@ -11,9 +11,13 @@
 #include <stdint.h>
 #include <elf.h>
 
+#include "../util/shim.h"
+
 #define OS_SPECIFIC_FLAG 2
 #define DT_RELACOUNT_NEW (DT_NUM)
 #define DT_GNU_HASH_NEW (DT_NUM + 1)
+
+/* DO NOT MODIFY ANYTHING ABOVE */
 
 typedef struct linkMap
 {
