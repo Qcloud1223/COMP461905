@@ -35,7 +35,10 @@ int main(int argc, char *argv[], char *env[])
 #else
         fprintf(stderr, "OpenLibrary cannot open file: %s\n", argv[1]);
 #endif
-        exit(-1);
+        // switch from exit to abort, indicating that this is an unwanted (but expected) exit
+        // in this way destructor functions will not be called
+        // exit(-1);
+        abort();
     }
 
     int func_type = atoi(argv[3]);
@@ -59,7 +62,8 @@ int main(int argc, char *argv[], char *env[])
 #else
                 fprintf(stderr, "FindSymbol cannot find symbol: %s\n", argv[2]);
 #endif
-                exit(-1);
+                // exit(-1);
+                abort();
             }
             f();
             break;
@@ -79,7 +83,8 @@ int main(int argc, char *argv[], char *env[])
 #else
                 fprintf(stderr, "FindSymbol cannot find symbol: %s\n", argv[2]);
 #endif
-                exit(-1);
+                // exit(-1);
+                abort();
             }
             int op1 = atoi(argv[4]);
             int op2 = atoi(argv[5]);
