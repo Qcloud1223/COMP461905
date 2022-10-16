@@ -109,6 +109,10 @@ class TestCase:
         except subprocess.CalledProcessError as e:
             if e.returncode == -signal.SIGSEGV:
                 print("SIGSEGV received in custom loader. Maybe you want to debug it with gdb.")
+            elif e.returncode == -signal.SIGABRT:
+                print("SIGABRT received in custom loader. Exit as expected.")
+                print("Last words from stdout:", e.stdout)
+                print("Last words from stderr:", e.stderr)
             else:
                 print("Oops, custom loader does not return normally.")
                 print("Last words from stdout:", e.stdout)

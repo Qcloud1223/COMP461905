@@ -27,7 +27,7 @@ void *symbolLookup(LinkMap *dep, const char *name)
         if(!handle)
         {
             fprintf(stderr, "relocLibrary error: cannot dlopen a fake object named %s", dep->name);
-            exit(-1);
+            abort();
         }
         dep->fakeHandle = handle;
         return dlsym(handle, name);
