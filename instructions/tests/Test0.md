@@ -214,6 +214,7 @@ prot |= (first_segment->prot & PF_R)? PROT_READ : 0;
 prot |= (first_segment->prot & PF_W)? PROT_WRITE : 0;
 prot |= (first_segment->prot & PF_X)? PROT_EXEC : 0;
 // NULL means "allow OS to pick up address for you"
+// Note: this line does not cover all corner cases
 void *start_addr = mmap(NULL, ALIGN_UP(first_segment->p_memsz, getpagesize()), prot, 
      MAP_FILE | MAP_PRIVATE, fd, ALIGN_DOWN(first_segment->offset, getpagesize()));
 ```
