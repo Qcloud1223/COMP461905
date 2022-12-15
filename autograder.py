@@ -30,8 +30,8 @@ class FuncUsage:
             if usageNum == 0:
                 continue
             if funcName in self.funcList:
-                # if the usage is below limit, it should be OK
-                if self.funcList[funcName] > usageNum:
+                # only alert if real usage exceeds the reference solution
+                if usageNum > self.funcList[funcName]:
                     print("Function name:", funcName, "Expected usage:", self.funcList[funcName], "Real usage:", usageNum)
                     violate += 1
             else:
