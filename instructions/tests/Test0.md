@@ -208,7 +208,7 @@ The helper macros `ALIGN_UP` and `ALIGN_DOWN` in `src/MapLibrary.c` is designed 
 
 ```c
 // Elf64_Phdr *first_segment;
-// int fd = open(path_to_library);
+// int fd = open(path_to_library, flags);
 int prot = 0;
 prot |= (first_segment->prot & PF_R)? PROT_READ : 0;
 prot |= (first_segment->prot & PF_W)? PROT_WRITE : 0;

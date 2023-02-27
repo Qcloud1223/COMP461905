@@ -5,6 +5,7 @@
 #include <elf.h>
 #include <unistd.h> //for getpagesize
 #include <sys/mman.h>
+#include <fcntl.h>
 
 #include "Link.h"
 #include "LoaderInternal.h"
