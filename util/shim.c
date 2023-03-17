@@ -4,6 +4,7 @@
 #include <dlfcn.h>
 #include <stdarg.h>
 #include <string.h>
+#include <sys/mman.h>
 
 /* notify the header to not replace out implementation */
 #define IN_SHIM
@@ -102,4 +103,32 @@ void shim_summary()
     PRINT_FUNC_USAGE(dlopen);
     PRINT_FUNC_USAGE(dlsym);
     PRINT_FUNC_USAGE(fwrite);
+}
+
+/* Intercept mmap not for monitoring usage. 
+   Instead, most of the students are not aware of where they have mmap'd, 
+   which might lead to less understandable results */
+void *mymmap(void *addr, size_t length, int prot, int flags,
+                  int fd, off_t offset)
+{
+    #ifdef LOADER_DEBUG
+    char perm[5] = "----";
+    if (prot & PROT_READ)
+        perm[0] = 'r';
+    if (prot & PROT_WRITE)
+        perm[1] = 'w';
+    if (prot & PROT_EXEC)
+        perm[2] = 'x';
+    
+    char f[64] = "";
+    if (flags & MAP_PRIVATE)
+        strcat(f, "MAP_PRIVATE");
+    if (flags & MAP_FIXED)
+        strcat(f, " MAP_FIXED");
+    fprintf(stderr, "trying to mmap at: %p, length:%lu, protection: %s, flags: %s, fd: %d, offset: %ld\n",
+        addr, length, perm, f, fd, offset);
+    #endif
+    void *ret = mmap(addr, length, prot, flags, fd, offset);
+    /* TODO: check return value */
+    return ret;
 }

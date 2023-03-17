@@ -45,8 +45,9 @@ class FuncUsage:
 
 class TestCase:
 
-    dlopenExe = './build/run-dlopen'
+    dlopenExe   = './build/run-dlopen'
     customLdExe = './build/run-openlib'
+    debugExe    = './build/debug-openlib'
 
     def __init__(self, soName, funcName, funcType, *args):
         self.soName = soName
@@ -78,7 +79,7 @@ class TestCase:
     
     def debug(self):
         self.debugArg = ['gdb', '--args']
-        self.debugArg.extend((self.customLdExe, self.soName, self.funcName, self.funcType))
+        self.debugArg.extend((self.debugExe, self.soName, self.funcName, self.funcType))
         if self.extraArg:
             self.debugArg.extend(self.args)
         subprocess.call(self.debugArg)

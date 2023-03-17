@@ -34,12 +34,16 @@ else
 	LDR += -l:loader-sample.so
 	ALL-OBJ = loader-sample libs test
 endif
+# build the debug one unconditionally
+LDR-DBG = -L./build -Wl,-rpath,./build -l:loader-debug.so
+ALL-OBJ := loader-debug $(ALL-OBJ)
 
 all: $(ALL-OBJ)
 
 # sample loader and skeleton loader library
 loader: build/loader.so
 loader-sample: build/loader-sample.so
+loader-debug: build/loader-debug.so
 .PHONY: test
 
 build/loader.so: $(LOADER-SRC) | build
@@ -47,6 +51,9 @@ build/loader.so: $(LOADER-SRC) | build
 
 build/loader-sample.so: $(LOADER-SAMPLE-SRC) | build
 	$(CC) $(CFLAGS) $(LOADER-SAMPLE-SRC) -o $@ $(LDFLAGS)
+
+build/loader-debug.so: $(LOADER-SRC) | build
+	$(CC) $(CFLAGS) -DLOADER_DEBUG $(LOADER-SRC) -o $@ $(LDFLAGS)
 
 # test libs for autograder
 libs: $(TST-LIBS) test_lib/SimpleDep.so test_lib/IndirectDep.so
@@ -69,13 +76,16 @@ build:
 # $(CC) -g -o $@ $< $(CUSTOM-LDR)
 
 # test program used as slave of autograder
-test: build/run-dlopen build/run-openlib
+test: build/run-dlopen build/run-openlib build/debug-openlib
 
 build/run-dlopen: test.c
 	$(CC) -g -DUSE_DLOPEN=1 -o $@ $< $(LDFLAGS)
 
 build/run-openlib: test.c
 	$(CC) -g -o $@ $< $(LDR)
+
+build/debug-openlib: test.c
+	$(CC) -g -DLOADER_DEBUG -o $@ $< $(LDR-DBG)
 
 # shim layer that is used to intercept calls to critical functions
 # shim: build/libshim.so 
