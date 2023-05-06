@@ -29,17 +29,12 @@ typedef struct linkMap
     // base address of the library
     uint64_t addr;
     // name of the library
-    char *name;
+    const char *name;
     // absolute address of dynamic segment
     Elf64_Dyn *dyn;
-    struct linkMap *next;
-    
-    struct linkMap **searchList;
     // a copy of dynamic segement, leave it alone
     Elf64_Dyn *dynInfo[DT_NUM + OS_SPECIFIC_FLAG];
-    FILE *fs;
     // if we need the original dlopen to correctly handle this library
-    int fake;
     void *fakeHandle;
 
     // elements used by ELF's bloom filter
@@ -52,7 +47,8 @@ typedef struct linkMap
     const Elf32_Word *l_gnu_buckets;
     const Elf32_Word *l_gnu_chain_zero;
 
-    /* TODO: delete next and searchlist to make students able to customize searching */
+    /* Do not modify anything above */
+    /* Your code here */
 } LinkMap;
 
 #endif /* Link.h */
