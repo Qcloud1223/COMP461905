@@ -35,6 +35,7 @@ typedef struct linkMap
     // a copy of dynamic segement, leave it alone
     Elf64_Dyn *dynInfo[DT_NUM + OS_SPECIFIC_FLAG];
     // if we need the original dlopen to correctly handle this library
+    int fake;
     void *fakeHandle;
 
     // elements used by ELF's bloom filter
