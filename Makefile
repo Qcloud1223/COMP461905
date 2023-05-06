@@ -24,6 +24,8 @@ ifeq "$(GCCVERSIONGTEQ9)" "1"
 endif
 # let the functions use the version as specified in source
 CFLAGS += -fno-builtin
+# treat warnings as errors such that students won't get incompatible pointers
+CFLAGS += -Werror
 
 LDFLAGS = -ldl
 LDR = -L./build -Wl,-rpath,./build
