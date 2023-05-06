@@ -94,7 +94,7 @@ build/debug-openlib: test.c
 # 	$(CC) $(CFLAGS) -o $@ $< $(LDR) $(LDFLAGS)
 
 clean:
-	rm -f build/loader.so build/loader-sample.so build/run-dlopen build/run-openlib
+	rm -f build/loader.so build/loader-sample.so build/loader-debug.so build/run-dlopen build/run-openlib build/debug-openlib
 
 cleanlib:
 	rm -f test_lib/*.so

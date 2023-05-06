@@ -30,7 +30,7 @@ static void setup_hash(LinkMap *l)
     uint32_t *hash;
 
     /* borrowed from dl-lookup.c:_dl_setup_hash */
-    Elf32_Word *hash32 = (Elf32_Word *)l->dynInfo[DT_GNU_HASH_NEW]->d_un.d_ptr;
+    Elf32_Word *hash32 = (Elf32_Word *)l->dynInfo[DT_GNU_HASH]->d_un.d_ptr;
     l->l_nbuckets = *hash32++;
     Elf32_Word symbias = *hash32++;
     Elf32_Word bitmask_nwords = *hash32++;
@@ -55,10 +55,10 @@ static void fill_info(LinkMap *lib)
     {
         if ((Elf64_Xword)dyn->d_tag < DT_NUM)
             dyn_info[dyn->d_tag] = dyn;
-        else if ((Elf64_Xword)dyn->d_tag == DT_RELACOUNT)
-            dyn_info[DT_RELACOUNT_NEW] = dyn;
-        else if ((Elf64_Xword)dyn->d_tag == DT_GNU_HASH)
-            dyn_info[DT_GNU_HASH_NEW] = dyn;
+        else if ((Elf64_Xword)dyn->d_tag == DT_RELACOUNT_)
+            dyn_info[DT_RELACOUNT] = dyn;
+        else if ((Elf64_Xword)dyn->d_tag == DT_GNU_HASH_)
+            dyn_info[DT_GNU_HASH] = dyn;
         ++dyn;
     }
     #define rebase(tag)                             \
@@ -71,7 +71,7 @@ static void fill_info(LinkMap *lib)
     rebase(DT_STRTAB);
     rebase(DT_RELA);
     rebase(DT_JMPREL);
-    rebase(DT_GNU_HASH_NEW); //DT_GNU_HASH
+    rebase(DT_GNU_HASH); //DT_GNU_HASH
     rebase(DT_PLTGOT);
     rebase(DT_INIT);
     rebase(DT_INIT_ARRAY);

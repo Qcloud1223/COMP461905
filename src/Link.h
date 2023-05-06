@@ -13,9 +13,14 @@
 
 #include "../util/shim.h"
 
+/* Prevent unreadable *_NEW, instead we redefine it to fit in array */
 #define OS_SPECIFIC_FLAG 2
-#define DT_RELACOUNT_NEW (DT_NUM)
-#define DT_GNU_HASH_NEW (DT_NUM + 1)
+#define DT_RELACOUNT_ 0x6ffffff9
+#define DT_GNU_HASH_  0x6ffffef5
+#undef DT_RELACOUNT
+#undef DT_GNU_HASH
+#define DT_RELACOUNT (DT_NUM)
+#define DT_GNU_HASH (DT_NUM + 1)
 
 /* DO NOT MODIFY ANYTHING ABOVE */
 
@@ -46,6 +51,8 @@ typedef struct linkMap
     const Elf64_Addr *l_gnu_bitmask;
     const Elf32_Word *l_gnu_buckets;
     const Elf32_Word *l_gnu_chain_zero;
+
+    /* TODO: delete next and searchlist to make students able to customize searching */
 } LinkMap;
 
 #endif /* Link.h */
