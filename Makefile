@@ -100,3 +100,6 @@ clean:
 
 cleanlib:
 	rm -f test_lib/*.so
+
+submit:
+	zip -r $(shell whoami | cut -d- -f1 | sed -e 's/[0-9]*/&-lab5.zip/') src/
